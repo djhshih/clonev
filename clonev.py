@@ -331,7 +331,6 @@ def create_clones(freqs):
 	clone_freqs = freqs[1:]
 
 	ntimes = len(clone_freqs[0]) + 1
-	#nclones = len(clone_freqs)
 
 	# calculate y positions for clones (determine overlap between clones)
 	# y positions using bottom as reference point
@@ -441,7 +440,20 @@ def main():
 	with open(argv.input, 'r') as inf:
 		config = yaml.load(inf.read())
 
-	plot_svg(config['clone_frequencies'], argv.output, config['time_labels'], config['clone_labels'], config['clone_colours'], width=argv.width, height=argv.height)
+	clone_freqs = config['clone_frequencies']
+
+	if 'time_labels' not in config.keys():
+		ntimes = len(clone_freqs[0]) + 1
+		config['time_labels'] = [str(x) for x in range(ntimes)]
+	
+	if 'clone_labels' not in config.keys():
+		nclones = len(clone_freqs) - 1
+		clone_labels = ['other clones']
+		for i in range(nclones):
+			clone_labels.append('clone ' + chr(ord('A') + i))
+		config['clone_labels'] = clone_labels
+
+	plot_svg(clone_freqs, argv.output, config['time_labels'], config['clone_labels'], config['clone_colours'], width=argv.width, height=argv.height)
 
 
 if __name__ == '__main__':
