@@ -257,7 +257,7 @@ class StreamGraph():
 		# draw y-axis grids
 		cr.set_source_rgb(0.9, 0.9, 0.9)
 		cr.set_line_width(max(cr.device_to_user_distance(0.2, 0.2)))
-		nyintervals=4
+		nyintervals = 4
 		for y in linspace(-0.5, 0.5, nyintervals+1):
 			path_line(cr, (0, y), (1, y))
 			cr.stroke()
@@ -317,7 +317,7 @@ class StreamGraph():
 		legend_colours = tuple(colours[1:]) + (colours[0],)
 
 		# draw fill legend
-		legend(cr, (margin_left + area_width + 10, margin_top + 8), legend_labels, legend_colours)
+		legend(cr, (margin_left + area_width + 10, margin_top + 5), legend_labels, legend_colours)
 		
 
 # create clones based on observed clonal frequencies
@@ -343,13 +343,17 @@ def create_clones(freqs):
 		for clone_freq in clone_freqs:
 			fs.append(clone_freq[i])
 
-		# if freq_sum > 1.0, then there must be some overlap
+		purity = tumour_freq[i]
+		# if freq_sum > purity, then there must be some overlap
 		freq_sum = sum(fs)
 		# total spacing 'deficit'
-		spacing = min(1.0 - freq_sum, 0)
+		spacing = min(purity - freq_sum, 0)
 
 		# shift to make clones centered vertically
-		shift = max(1.0 - freq_sum, 0) * 0.5
+		if freq_sum >= purity:
+			shift = (1.0 - purity) * 0.5
+		else:
+			shift = (purity - freq_sum) * 0.5
 
 		# calculate normalized frequency, skipping first element (for distributing spacing 'deficit')
 		freq_sum2 = sum(fs[1:])
@@ -371,7 +375,7 @@ def create_clones(freqs):
 
 	# infer when clone arises based on observed prevalence, using a simple equation
 	# assume all detectable clones has arisen before t = 0.5
-	# time in [0, 0.5], time = (1 - p)*0.5
+	# time in [0, 0.5], time = (1 - p) * 0.5
 
 	clone_all = Clone(linspace(0, 1, ntimes), [0] * ntimes, [0] + [f*0.5 for f in tumour_freq])
 
