@@ -353,9 +353,11 @@ def create_clones(freqs):
 		if freq_sum >= purity:
 			shift = (1.0 - purity) * 0.5
 		else:
-			shift = (purity - freq_sum) * 0.5
+			#shift = (purity - freq_sum) * 0.5
+			shift = (1.0 - freq_sum) * 0.5
 
-		# calculate normalized frequency, skipping first element (for distributing spacing 'deficit')
+		# calculate normalized frequency, skipping first element, since first element will not be moved
+		# for distributing spacing 'deficit'
 		freq_sum2 = sum(fs[1:])
 		gs = [0] + [f/freq_sum2 for f in fs[1:]]
 
@@ -364,10 +366,19 @@ def create_clones(freqs):
 		cumy = 0
 		for f, g in zip(fs, gs):
 			cumy += f + (spacing * g)
-			ys.append(cumy + shift)
+			# convert y coordinate origin from 0 to -0.5
+			# convert y coordinate of reference point from (bottom) to (middle)
+			y = cumy + shift - 0.5 - f/2
+			# for unknown reason, y can be too small for some clone (when there is a spacing deficit)
+			# use a lower bound as a hack
+			# FIXME find the reason and fix this properly!
+			if y - f/2 < -0.5:
+				y = 0
+			ys.append(y)
 
 		clone_ys.append(ys)
 
+	#print(clone_ys)
 
 	# assuming that prior to first observation, all clones have same growth rate
 	# (almost surely invalid, but no growth rate data is available)
@@ -402,8 +413,7 @@ def create_clones(freqs):
 
 			# add point at t+1
 			xs.append(t+1)
-			# convert reference point from (left, bottom) to (left, center)
-			ys.append(clone_ys[t][clone_idx] - 0.5 - f/2)
+			ys.append(clone_ys[t][clone_idx])
 			ws.append(f/2)
 
 			t += 1
