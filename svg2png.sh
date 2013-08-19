@@ -6,7 +6,7 @@ if [ $# -lt 1 ]; then
 fi
 
 input=$1
-output=${input%%.*}.png
+output=${input%.*}.png
 
 inkscape -z --export-png $output --export-width 1200 --export-height 300 $input
 
